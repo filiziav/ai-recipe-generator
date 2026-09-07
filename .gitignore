@@ -1,0 +1,19 @@
+# Miljövariabler och API-nycklar (Skydda alltid API-nycklar från GitHub)
+.env
+*.env
+.env.*
+!.env.example
+
+# Virtuell Python-miljö
+.venv/
+env/
+venv/
+ENV/
+
+# Python-cache och kompilering
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Loggar
+*.log

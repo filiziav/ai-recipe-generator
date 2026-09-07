@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Recipe Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidhuvud -->
+        <header class="header">
+            <div class="logo-icon">🍳</div>
+            <h1>AI Recipe Generator</h1>
+            <p class="subtitle">Skapa goda och enkla recept utifrån vad du redan har hemma i kylen och skafferiet.</p>
+        </header>
+
+        <!-- Formulärkort -->
+        <main class="main-card">
+            <form id="recipe-form">
+                <!-- Ingredienser -->
+                <div class="form-group">
+                    <label for="ingredients">
+                        <span class="label-title">Ingredienser</span>
+                        <span class="label-hint">Vad har du hemma? Separera med komma eller radbrytning.</span>
+                    </label>
+                    <textarea 
+                        id="ingredients" 
+                        name="ingredients" 
+                        rows="3" 
+                        placeholder="t.ex. kycklingfilé, ris, lök, matlagningsgrädde, curry..."
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-row">
+                    <!-- Antal portioner -->
+                    <div class="form-group form-group-half">
+                        <label for="servings">
+                            <span class="label-title">Antal portioner</span>
+                        </label>
+                        <div class="number-input-wrapper">
+                            <input 
+                                type="number" 
+                                id="servings" 
+                                name="servings" 
+                                min="1" 
+                                max="20" 
+                                value="2" 
+                                required
+                            >
+                            <span class="unit-text">port.</span>
+                        </div>
+                    </div>
+
+                    <!-- Önskemål -->
+                    <div class="form-group form-group-half">
+                        <label for="preferences">
+                            <span class="label-title">Önskemål</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="preferences" 
+                            name="preferences" 
+                            placeholder="t.ex. vegetariskt, snabbt, starkt..."
+                        >
+                    </div>
+                </div>
+
+                <!-- Snabbval/Taggar för önskemål -->
+                <div class="quick-tags-container">
+                    <span class="quick-tags-label">Förslag på önskemål:</span>
+                    <div class="quick-tags">
+                        <button type="button" class="tag-btn" data-tag="Vegetariskt">Vegetariskt</button>
+                        <button type="button" class="tag-btn" data-tag="Snabbt & enkelt">Snabbt & enkelt</button>
+                        <button type="button" class="tag-btn" data-tag="Starkt">Starkt</button>
+                        <button type="button" class="tag-btn" data-tag="Glutenfritt">Glutenfritt</button>
+                        <button type="button" class="tag-btn" data-tag="Barnvänligt">Barnvänligt</button>
+                    </div>
+                </div>
+
+                <!-- Skicka-knapp -->
+                <div class="form-actions">
+                    <button type="submit" id="submit-btn" class="btn-primary">
+                        <span class="btn-icon">✨</span>
+                        <span class="btn-text">Generera recept</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Laddningsindikator -->
+            <div id="loading-spinner" class="loading-state hidden">
+                <div class="spinner"></div>
+                <p class="loading-text">Genererar ett läckert recept åt dig...</p>
+            </div>
+
+            <!-- Felmeddelande -->
+            <div id="error-message" class="error-banner hidden"></div>
+        </main>
+
+        <!-- Resultatsektion för receptet -->
+        <section id="recipe-result" class="recipe-card hidden">
+            <div class="recipe-header">
+                <div>
+                    <span class="recipe-badge">Ditt skapade recept</span>
+                    <h2 id="recipe-title" class="recipe-title"></h2>
+                    <p id="recipe-description" class="recipe-description"></p>
+                </div>
+            </div>
+
+            <!-- Metadata-brickor -->
+            <div class="recipe-meta-grid">
+                <div class="meta-item">
+                    <span class="meta-icon">👥</span>
+                    <div>
+                        <span class="meta-label">Portioner</span>
+                        <span id="recipe-servings" class="meta-value"></span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-icon">⏱️</span>
+                    <div>
+                        <span class="meta-label">Tillagning</span>
+                        <span id="recipe-cooktime" class="meta-value"></span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-icon">🏷️</span>
+                    <div>
+                        <span class="meta-label">Önskemål</span>
+                        <span id="recipe-preferences" class="meta-value"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ingredienser & Instruktioner -->
+            <div class="recipe-content-grid">
+                <div class="recipe-column">
+                    <h3>Ingredienser</h3>
+                    <ul id="recipe-ingredients-list" class="ingredients-list"></ul>
+                </div>
+
+                <div class="recipe-column">
+                    <h3>Gör så här</h3>
+                    <ol id="recipe-instructions-list" class="instructions-list"></ol>
+                </div>
+            </div>
+
+            <!-- Kockens tips / AI-info -->
+            <div id="recipe-tip" class="tip-box">
+                <span class="tip-icon">💡</span>
+                <div>
+                    <strong>Tips:</strong>
+                    <span id="recipe-tip-text"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sidfot -->
+        <footer class="footer">
+            <p>AI Recipe Generator &bull; Skolprojekt i Webbutveckling med Python & Flask</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
